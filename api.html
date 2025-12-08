@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef6ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #1e90ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Weather App</h2>
+    <input type="text" id="city" placeholder="Enter city name">
+    <button onclick="getWeather()">Get Weather</button>
+
+    <h3 id="temp"></h3>
+    <p id="desc"></p>
+</div>
+
+<script>
+    async function getWeather() {
+        let city = document.getElementById("city").value;
+
+        // 1. Convert city name → latitude/longitude
+        let geoURL = `https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+
+        let geoData = await fetch(geoURL).then(res => res.json());
+
+        if (!geoData.results || geoData.results.length === 0) {
+            document.getElementById("temp").innerHTML = "City not found!";
+            document.getElementById("desc").innerHTML = "";
+            return;
+        }
+
+        let lat = geoData.results[0].latitude;
+        let lon = geoData.results[0].longitude;
+
+        // 2. Get weather using lat/lon
+        let weatherURL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+
+        let weatherData = await fetch(weatherURL).then(res => res.json());
+
+        let temp = weatherData.current_weather.temperature;
+        let wind = weatherData.current_weather.windspeed;
+
+        // 3. Display on page
+        document.getElementById("temp").innerHTML = "Temperature: " + temp + "°C";
+        document.getElementById("desc").innerHTML = "Wind Speed: " + wind + " km/h";
+    }
+</script>
+
+</body>
+</html>
